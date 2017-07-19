@@ -40,37 +40,11 @@ def create_table():
 
 
 def gifters_cities_dict():
-	return {'olaoluwa.ogunwa@rimonlaw.com' : ['Bedminster', 'Boston', 'Jerusalem', 'Miami', 'New York', 'Newark', 'Northern Virginia', 'NYC', 'Orlando', 'Research Triangle', 'Tel Aviv', 'Washington, D.C.', 'DC'],
-	'oluwafadekemmie@gmail.com' : ['Chicago', 'Dallas', 'Minneapolis'],
-	'fadekemmie@yahoo.com' : ['Lake Tahoe', 'Las Vegas', 'Los Angeles', 'Orange County', 'Palo Alto', 'Menlo Park', 'Silicon Valley', 'Portland', 'Sacramento', 'San Diego', 'San Francisco', 'Seattle'],
-	'olarimonuipathquiz@gmail.com': ['Not Available'] }
+	return {'kynyziah.shaw@rimonlaw.com' : ['Bedminster', 'Boston', 'Jerusalem', 'Miami', 'New York', 'Newark', 'Northern Virginia', 'NYC', 'Orlando', 'Research Triangle', 'Tel Aviv', 'Washington, D.C.', 'DC'],
+	'silvia.alonso-falip@rimonlaw.com' : ['Chicago', 'Dallas', 'Minneapolis'],
+	'admin@rimonlaw.com' : ['Lake Tahoe', 'Las Vegas', 'Los Angeles', 'Orange County', 'Palo Alto', 'Menlo Park', 'Silicon Valley', 'Portland', 'Sacramento', 'San Diego', 'San Francisco', 'Seattle'],
+	'yaacov@rimonlaw.com': ['Not Available'] }
 
 	
 
 create_table()
-
-
-
-
-# # check  if table exist
-# conn = sqlite3.connect('gifter.db')
-# c = conn.cursor()
-# query = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='gifters_locations';"
-# # print "wrong table name", c.execute(query)
-# w = c.execute(query)
-# print  "right table", w.fetchone()
-
-# query = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='stocks';"
-# # print "right table name", c.execute(query)
-# r = c.execute(query)
-# print "right table", r.fetchone()[1]
-
-
-
-# gifters = [
-# 	{'olaoluwa.ogunwa@rimonlaw.com' : ['Bedminster', 'Boston', 'Jerusalem', 'Miami', 'New York', 'Newark', 'Northern Virginia', 'NYC', 'Orlando', 'Research Triangle', 'Tel Aviv', 'Washington, D.C.', 'DC'] },
-# 	{'oluwafadekemmie@gmail.com' : ['Chicago', 'Dallas', 'Minneapolis'] },
-# 	{'fadekemmie@yahoo.com' : ['Lake Tahoe', 'Las Vegas', 'Los Angeles', 'Orange County', 'Palo Alto', 'Menlo Park', 'Silicon Valley', 'Portland', 'Sacramento', 'San Diego', 'San Francisco', 'Seattle'] },
-# 	{'olarimonuipathquiz@gmail.com', ['-'] }
-
-# ]

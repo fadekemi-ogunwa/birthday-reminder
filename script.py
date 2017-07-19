@@ -1,25 +1,28 @@
+#!/bin/bash
+#PATH=/opt/someApp/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+import os
 import requests
 import json
 from datetime import datetime
 import sqlite3
-import dotenv
+
+from dotenv import load_dotenv, find_dotenv
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 import db_utils
 
+load_dotenv(find_dotenv())
 
-dotenv.load()
-
-no_city_found_email = dotenv.get('NO_CITY_FOUND_EMAIL')
-from_email = dotenv.get('SENDER_EMAIL')
+no_city_found_email =  os.environ.get('NO_CITY_FOUND_EMAIL') #= dotenv.get('NO_CITY_FOUND_EMAIL')
+from_email = os.environ.get('SENDER_EMAIL')
 
 
 def birthdays_locations(per_page, current_page, locations_dict = dict()):
 	url = 'https://rimon.namely.com/api/v1/profiles.json?filter[status]=active&per_page=' + str(per_page) + '&page=' + str(current_page)
 
-	token = dotenv.get('TOKEN')
+	token = os.environ.get('TOKEN')
 
 	payload = "{}"
 	headers = {'authorization': 'Bearer ' + token}
@@ -33,7 +36,7 @@ def birthdays_locations(per_page, current_page, locations_dict = dict()):
 	print "Current Page: " + str(current_page)
 	count = 1
 	for row in json_data['profiles']:
-		location = "Not Available" if row['office']['city'] == None else row['office']['city']
+		location = "Not Available" if row['home']['city'] == None else row['home']['city']
 		today = datetime.today()
 		if row['dob']:
 			birthday_obj = datetime.strptime(row['dob'], '%Y-%m-%d').replace(year = today.year)
@@ -94,21 +97,21 @@ for location in locations:
 
 
 for gifter in gifter_email_dict:
-	msg_body = "<p><b>Hey! Here are birthdays coming up in 14 days</b></p>"
+	msg_body = "<p>Hey there,</p><p><b>Hey! Here are birthdays coming up in 14 days</b></p>"
 	for celebrant_info in gifter_email_dict[gifter]:
-		msg_body += "<p><b>" + celebrant_info['fullname'] + "</b> - " + celebrant_info['birthday'] + ". Location : " + celebrant_info['city'] + "</p><br>"
+		msg_body += "<p><b>" + celebrant_info['fullname'] + "</b> - " + celebrant_info['birthday'] + ". Location : " + celebrant_info['city'] + "</p><br><p>Please write Michael and Yaacov with (a) a suggested gift, and (b) suggested wording for a card. Thank you.</p>"
 
 	msg = MIMEMultipart()
 	msg['From'] = from_email
 	msg['To'] = gifter
-	msg['Subject'] = "Birthday Reminder"
+	msg['Subject'] = "Birthday Reminders- " + datetime.today().strftime('%Y-%m-%d')
 	msg.attach(MIMEText(msg_body, 'html'))
 
 	text = msg.as_string()
 
-	server = smtplib.SMTP('smtp.gmail.com', 587)
+	server = smtplib.SMTP('smtp.office365.com', 587)
 	server.starttls()
-	server.login(dotenv.get('SMTP_USERNAME'), dotenv.get('SMTP_PASSWORD'))
+	server.login(os.environ.get('SMTP_USERNAME'), os.environ.get('SMTP_PASSWORD'))
 	response = server.sendmail(from_email, gifter, text)
 	print response, " - Sent email to ", gifter
 	server.quit()
