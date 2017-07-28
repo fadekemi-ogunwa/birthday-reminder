@@ -1,25 +1,29 @@
-#!/bin/bash
-#PATH=/opt/someApp/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
 import os
 import requests
 import json
 from datetime import datetime
 import sqlite3
+import yampy
 
 from dotenv import load_dotenv, find_dotenv
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 import db_utils
+from time import sleep
 
 load_dotenv(find_dotenv())
 
 no_city_found_email =  os.environ.get('NO_CITY_FOUND_EMAIL') #= dotenv.get('NO_CITY_FOUND_EMAIL')
 from_email = os.environ.get('SENDER_EMAIL')
+office_location_id = os.environ.get('OFFICE_LOCATION_ID')
+
+ids = []
+
+yammer = yampy.Yammer(access_token=os.environ.get('YAMMER_TOKEN'))
 
 
-def birthdays_locations(per_page, current_page, locations_dict = dict()):
+def birthdays_locations(per_page, current_page):
 	url = 'https://rimon.namely.com/api/v1/profiles.json?filter[status]=active&per_page=' + str(per_page) + '&page=' + str(current_page)
 
 	token = os.environ.get('TOKEN')
@@ -34,43 +38,51 @@ def birthdays_locations(per_page, current_page, locations_dict = dict()):
 
 	print "Total records: " + str(total_records) + "\n"
 	print "Current Page: " + str(current_page)
-	count = 1
-	for row in json_data['profiles']:
-		location = "Not Available" if row['home']['city'] == None else row['home']['city']
+
+	addresses = filter(lambda x: x['type'] == 'Office Location', json_data['linked']['groups'])
+	ids = [x['id'] for x in addresses]
+	# print addresses
+
+	def filter_birthday(profile):
 		today = datetime.today()
-		if row['dob']:
-			birthday_obj = datetime.strptime(row['dob'], '%Y-%m-%d').replace(year = today.year)
-			days_left = (birthday_obj - today).days
+		if profile['dob']:
+			birthday_obj = datetime.strptime(profile['dob'], '%Y-%m-%d').replace(year = today.year)
+			days_left = (birthday_obj - today).days + 1
+
+			# Post to Yammer
+			if days_left == 0:
+				yammer_post = "Today is " + profile['full_name'] + "'s birthday. Happy birthday, " + profile['full_name'] + "!"
+				yammer.messages.create(yammer_post, topics=["Birthday"])
+				sleep(5)
 			
 			if days_left == 14:
-				person = {'fullname': str(row['first_name']) + " " + str(row['last_name']), 'birthday': str(birthday_obj), 'city': location}
-				if location in locations_dict:
-					locations_dict[location].append(person)
-				else:
-					locations_dict[location] = [person]
+				locations = filter(lambda x: x['id'] in ids, profile['links']['groups'])
+				profile['city'] = 'Not Available' if len(locations) == 0 else locations[0]['name'] 
+				return True
+		return False
 
-		else:
-			print ""
+	profiles = filter(filter_birthday, json_data['profiles'])
 
-		count = count + 1
-	return (locations_dict, (total_records > (per_page*current_page)))
+	return (profiles, (total_records > (per_page*current_page)))
+
 
 per_page = 50
 current_page = 1
 
-api_call = birthdays_locations(per_page, current_page, dict())	
+api_call = birthdays_locations(per_page, current_page)
 
-locations = api_call[0]
+birthday_profiles = api_call[0]
 run_again = api_call[1]
+
 
 while run_again:
 	current_page += 1
-	api_call = birthdays_locations(per_page, current_page, locations)
-	locations = api_call[0]
+	api_call = birthdays_locations(per_page, current_page)
+	birthday_profiles.extend(api_call[0])
 	run_again = api_call[1]
 
-
-
+print "Profiles: "
+# print birthday_profiles[0]['city']
 
 conn = sqlite3.connect('gifter.db')
 c = conn.cursor()
@@ -78,28 +90,22 @@ c = conn.cursor()
 
 gifter_email_dict = dict()
 
-for location in locations:
-	celebrants = locations[location]
-	query = "SELECT * FROM gifters_locations WHERE city = '" + location + "';"
+for person in birthday_profiles:
+	query = "SELECT * FROM gifters_locations WHERE city = '" + person['city'] + "';"
 	w = c.execute(query)
 	gifter = w.fetchone()
+	gifter_email = gifter[0] if gifter else no_city_found_email
 
-	if gifter != None:
-		gifter_email = gifter[0]
-	else:
-		gifter_email = no_city_found_email
+	print gifter_email
+	gifter_email_dict[gifter_email] = [person] if not gifter_email_dict.get(gifter_email, False) else gifter_email_dict[gifter_email].append(person)
 
-	if gifter_email in gifter_email_dict:
-		for celebrant in celebrants:
-			gifter_email_dict[gifter_email].append(celebrant)
-	else:
-		gifter_email_dict[gifter_email] = celebrants
 
+	
 
 for gifter in gifter_email_dict:
 	msg_body = "<p>Hey there,</p><p><b>Hey! Here are birthdays coming up in 14 days</b></p>"
 	for celebrant_info in gifter_email_dict[gifter]:
-		msg_body += "<p><b>" + celebrant_info['fullname'] + "</b> - " + celebrant_info['birthday'] + ". Location : " + celebrant_info['city'] + "</p><br><p>Please write Michael and Yaacov with (a) a suggested gift, and (b) suggested wording for a card. Thank you.</p>"
+		msg_body += "<p><b>" + celebrant_info['full_name'] + "</b> - " + celebrant_info['dob'] + ". Location : " + celebrant_info['city'] + "</p><br><p>Please write Michael and Yaacov with (a) a suggested gift, and (b) suggested wording for a card. Thank you.</p>"
 
 	msg = MIMEMultipart()
 	msg['From'] = from_email
@@ -115,4 +121,25 @@ for gifter in gifter_email_dict:
 	response = server.sendmail(from_email, gifter, text)
 	print response, " - Sent email to ", gifter
 	server.quit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

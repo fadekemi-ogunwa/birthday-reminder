@@ -18,11 +18,9 @@ def create_table():
 	w = c.execute(query)
 	table_count = w.fetchone()[0]
 	if table_count > 0:
-		print "Dropping existing table"
 		delete_query = "DROP TABLE " + table_name + ";"
 		c.execute(delete_query)
 
-		print "Creating new table " + table_name
 
 	query = '''CREATE TABLE ''' + table_name + '''
 		  		(email text, city text)'''
@@ -34,6 +32,7 @@ def create_table():
 			query = "INSERT INTO " + table_name + "(email, city) VALUES ('" + gifter + "', '" + location + "')"
 			c.execute(query)
 			conn.commit()
+	
 
 	conn.close()
 
