@@ -24,7 +24,7 @@ yammer = yampy.Yammer(access_token=os.environ.get('YAMMER_TOKEN'))
 
 
 def birthdays_locations(per_page, current_page):
-	url = 'https://rimon.namely.com/api/v1/profiles.json?filter[status]=active&per_page=' + str(per_page) + '&page=' + str(current_page)
+	url = 'https://rimon.namely.com/api/v1/profiles.json?filter[user_status]=active&per_page=' + str(per_page) + '&page=' + str(current_page)
 
 	token = os.environ.get('TOKEN')
 
