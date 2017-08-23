@@ -107,7 +107,7 @@ for gifter in gifter_email_dict:
 		for celebrant_info in  gifter_email_dict[gifter]:
 			msg_body += "<p><b>" + celebrant_info['full_name'] + "</b> - " + celebrant_info['dob'] + ". Location : " + celebrant_info['city'] + "</p>"
 			if celebrant_info['dietary_restrictions'] != None:
-				msg_body += "<p><b>Allergies:</b> " + celebrant_info['dietary_restrictions'] + "</b></p><br>"
+				msg_body += "<p><b>Dietary Restrictions:</b> " + celebrant_info['dietary_restrictions'] + "</b></p><br>"
 		msg_body += "<p>Please write Michael and Yaacov with (a) a suggested gift, and (b) suggested wording for a card. Thank you.</p>"
 
 		msg = MIMEMultipart()
