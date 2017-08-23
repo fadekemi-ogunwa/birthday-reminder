@@ -105,7 +105,6 @@ for gifter in gifter_email_dict:
 	
 	if gifter_email_dict[gifter] != None:
 		for celebrant_info in  gifter_email_dict[gifter]:
-			celebrant_info['dietary_restrictions'] = "No Shrimps!"
 			msg_body += "<p><b>" + celebrant_info['full_name'] + "</b> - " + celebrant_info['dob'] + ". Location : " + celebrant_info['city'] + "</p>"
 			if celebrant_info['dietary_restrictions'] != None:
 				msg_body += "<p><b>Allergies:</b> " + celebrant_info['dietary_restrictions'] + "</b></p><br>"
