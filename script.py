@@ -34,14 +34,13 @@ def birthdays_locations(per_page, current_page):
 	response = requests.request("GET", url, data=payload, headers=headers)
 
 	json_data = json.loads(response.text)
-	total_records = json_data['meta']['count']
+	total_records = json_data['meta']['total_count']
 
 	print "Total records: " + str(total_records) + "\n"
 	print "Current Page: " + str(current_page)
 
 	addresses = filter(lambda x: x['type'] == 'Office Location', json_data['linked']['groups'])
 	ids = [x['id'] for x in addresses]
-	# print addresses
 
 	def filter_birthday(profile):
 		today = datetime.today()
@@ -54,7 +53,7 @@ def birthdays_locations(per_page, current_page):
 				yammer_post = "Today is " + profile['full_name'] + "'s birthday. Happy birthday, " + profile['full_name'] + "!"
 				yammer.messages.create(yammer_post, topics=["Birthday"])
 				sleep(5)
-			
+
 			if days_left == 14:
 				locations = filter(lambda x: x['id'] in ids, profile['links']['groups'])
 				profile['city'] = 'Not Available' if len(locations) == 0 else locations[0]['name'] 
@@ -82,7 +81,6 @@ while run_again:
 	run_again = api_call[1]
 
 print "Profiles: "
-# print birthday_profiles[0]['city']
 
 conn = sqlite3.connect('gifter.db')
 c = conn.cursor()
@@ -96,31 +94,37 @@ for person in birthday_profiles:
 	gifter = w.fetchone()
 	gifter_email = gifter[0] if gifter else no_city_found_email
 
-	print gifter_email
-	gifter_email_dict[gifter_email] = [person] if not gifter_email_dict.get(gifter_email, False) else gifter_email_dict[gifter_email].append(person)
-
-
+	if gifter_email in gifter_email_dict:
+		gifter_email_dict[gifter_email].append(person)
+	else:
+		gifter_email_dict[gifter_email] = [person]
 	
 
 for gifter in gifter_email_dict:
 	msg_body = "<p>Hey there,</p><p><b>Hey! Here are birthdays coming up in 14 days</b></p>"
-	for celebrant_info in gifter_email_dict[gifter]:
-		msg_body += "<p><b>" + celebrant_info['full_name'] + "</b> - " + celebrant_info['dob'] + ". Location : " + celebrant_info['city'] + "</p><br><p>Please write Michael and Yaacov with (a) a suggested gift, and (b) suggested wording for a card. Thank you.</p>"
+	
+	if gifter_email_dict[gifter] != None:
+		for celebrant_info in  gifter_email_dict[gifter]:
+			celebrant_info['dietary_restrictions'] = "No Shrimps!"
+			msg_body += "<p><b>" + celebrant_info['full_name'] + "</b> - " + celebrant_info['dob'] + ". Location : " + celebrant_info['city'] + "</p>"
+			if celebrant_info['dietary_restrictions'] != None:
+				msg_body += "<p><b>Allergies:</b> " + celebrant_info['dietary_restrictions'] + "</b></p><br>"
+		msg_body += "<p>Please write Michael and Yaacov with (a) a suggested gift, and (b) suggested wording for a card. Thank you.</p>"
 
-	msg = MIMEMultipart()
-	msg['From'] = from_email
-	msg['To'] = gifter
-	msg['Subject'] = "Birthday Reminders- " + datetime.today().strftime('%Y-%m-%d')
-	msg.attach(MIMEText(msg_body, 'html'))
+		msg = MIMEMultipart()
+		msg['From'] = from_email
+		msg['To'] = gifter
+		msg['Subject'] = "Birthday Reminders - " + datetime.today().strftime('%Y-%m-%d')
+		msg.attach(MIMEText(msg_body, 'html'))
 
-	text = msg.as_string()
+		text = msg.as_string()
 
-	server = smtplib.SMTP('smtp.office365.com', 587)
-	server.starttls()
-	server.login(os.environ.get('SMTP_USERNAME'), os.environ.get('SMTP_PASSWORD'))
-	response = server.sendmail(from_email, gifter, text)
-	print response, " - Sent email to ", gifter
-	server.quit()
+		server = smtplib.SMTP('smtp.office365.com', 587)
+		server.starttls()
+		server.login(os.environ.get('SMTP_USERNAME'), os.environ.get('SMTP_PASSWORD'))
+		response = server.sendmail(from_email, gifter, text)
+		print response, " - Sent email to ", gifter
+		server.quit()
 
 
 
