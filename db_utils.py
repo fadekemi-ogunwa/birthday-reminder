@@ -45,6 +45,4 @@ def gifters_cities_dict():
 	'jessica.gonzalez@rimonlaw.com' : ['Palo Alto', 'Menlo Park', 'Silicon Valley'],
 	'yaacov@rimonlaw.com': ['Not Available'] }
 
-	
-
 create_table()
