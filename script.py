@@ -139,7 +139,7 @@ for gifter in gifter_email_dict:
         if not is_sent:
             send_msg(msg_body, gifter)
 
-
+#No city found in db_utils mail to be sent to yaacov
 
 
 
