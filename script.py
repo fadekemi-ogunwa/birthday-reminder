@@ -46,7 +46,10 @@ def birthdays_locations(per_page, current_page):
         today = datetime.today()
         if profile['dob']:
             birthday_obj = datetime.strptime(profile['dob'], '%Y-%m-%d').replace(year = today.year)
+            if birthday_obj.month == 1 and today.month == 12:
+                birthday_obj = birthday_obj.replace(year = today.year+1)
             days_left = (birthday_obj - today).days + 1
+
 
             #Post to Yammer
             if days_left == 0:
