@@ -39,8 +39,8 @@ def birthdays_locations(per_page, current_page):
     print "Total records: " + str(total_records) + "\n"
     print "Current Page: " + str(current_page)
 
-    addresses = filter(lambda x: x['type'] == 'Office Location', json_data['linked']['groups'])
-    ids = [x['id'] for x in addresses]
+    # addresses = filter(lambda x: x['type'] == 'Office Location', json_data['linked']['groups'])
+    # ids = [x['id'] for x in addresses]
 
     def filter_birthday(profile):
         today = datetime.today()
@@ -51,7 +51,7 @@ def birthdays_locations(per_page, current_page):
             days_left = (birthday_obj - today).days + 1
 
 
-            #Post to Yammer
+            Post to Yammer
             if days_left == 0:
               yammer_post = "Today is " + profile['full_name'] + "'s birthday. Happy birthday, " + profile['full_name'] + "!"
               yammer.messages.create(yammer_post, topics=["Birthday"])
@@ -59,7 +59,12 @@ def birthdays_locations(per_page, current_page):
 
             if days_left == 14:
                 locations = filter(lambda x: x['id'] in ids, profile['links']['groups'])
-                profile['city'] = 'Not Available' if len(locations) == 0 else locations[0]['name'] 
+                # profile['city'] = 'Not Available' if len(locations) == 0 else locations[0]['name'] 
+                office = profile.get('office', None)
+                city = 'Not Available'
+                if office and office.get('city'):
+                    city = office.get('city')
+                profile['city'] = city
                 return True
         return False
 
@@ -127,12 +132,13 @@ for person in birthday_profiles:
   
 
 for gifter in gifter_email_dict:
+    msg_body = ''
     if gifter_email_dict[gifter] != None:
         is_sent = None
         for celebrant_info in  gifter_email_dict[gifter]:
             print gifter, celebrant_info['email']
             is_sent = False
-            msg_body = "<p><b>" + celebrant_info['full_name'] + "</b> - " + celebrant_info['dob'] + ". Location : " + celebrant_info['city'] + "</p>"
+            msg_body += "<p><b>" + celebrant_info['full_name'] + "</b> - " + celebrant_info['dob'] + ". Location : " + celebrant_info['city'] + "</p>"
             if celebrant_info['dietary_restrictions'] != None:
                 msg_body += "<p><b>Dietary Restrictions:</b> " + celebrant_info['dietary_restrictions'] + "</b></p><br>"
             if celebrant_info['email'] == gifter:
