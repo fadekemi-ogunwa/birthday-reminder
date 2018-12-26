@@ -51,7 +51,7 @@ def birthdays_locations(per_page, current_page):
             days_left = (birthday_obj - today).days + 1
 
 
-            Post to Yammer
+            # Post to Yammer
             if days_left == 0:
               yammer_post = "Today is " + profile['full_name'] + "'s birthday. Happy birthday, " + profile['full_name'] + "!"
               yammer.messages.create(yammer_post, topics=["Birthday"])
