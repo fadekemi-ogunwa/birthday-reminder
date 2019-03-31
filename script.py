@@ -44,7 +44,7 @@ def birthdays_locations(per_page, current_page):
 
     def filter_birthday(profile):
         today = datetime.today()
-        if profile['dob']:
+        if profile['dob'] and (profile['full_name'] != "Nomi Moradzadeh" or profile['full_name'] != "Yenhoa Ching"):
             birthday_obj = datetime.strptime(profile['dob'], '%Y-%m-%d').replace(year = today.year)
             if birthday_obj.month == 1 and today.month == 12:
                 birthday_obj = birthday_obj.replace(year = today.year+1)
