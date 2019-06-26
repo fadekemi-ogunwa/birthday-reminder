@@ -39,8 +39,7 @@ def create_table():
 
 
 def gifters_cities_dict():
-	return {'kynyziah.shaw@rimonlaw.com' : ['Bedminster', 'Boston', 'Jerusalem', 'Miami', 'New York', 'Newark', 'Northern Virginia', 'NYC', 'Orlando', 'Research Triangle', 'Tel Aviv', 'Washington, D.C.', 'DC','Washington'],
-	'silvia.alonso-falip@rimonlaw.com' : ['Chicago', 'Dallas', 'Minneapolis', 'Kansas'],
+	return {'kynyziah.shaw@rimonlaw.com' : ['Bedminster', 'Boston', 'Jerusalem', 'Miami', 'New York', 'Newark', 'Northern Virginia', 'NYC', 'Orlando', 'Research Triangle', 'Tel Aviv', 'Washington, D.C.', 'DC','Washington', 'Chicago', 'Dallas', 'Minneapolis', 'Kansas'],
 	'admin@rimonlaw.com' : ['Lake Tahoe', 'Las Vegas', 'Los Angeles', 'Orange County', 'Portland', 'Sacramento', 'San Diego', 'San Francisco', 'Seattle', 'Boise', 'Idaho'],
 	'jessica.gonzalez@rimonlaw.com' : ['Palo Alto', 'Menlo Park', 'Silicon Valley'],
 	'yaacov@rimonlaw.com': ['Not Available'] }
